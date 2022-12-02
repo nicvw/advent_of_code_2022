@@ -1,13 +1,13 @@
-"""Advent of code 2022"""
-
-from pathlib import Path
 from typing import List
+
+from .utils import iterate_over_data
 
 #
 # On the first day of xmas...
+# https://adventofcode.com/2022/day/1
 #
 
-def parse_elves() -> List[int]:
+def elven_calories(number: int) -> int:
     """The Elves take turns writing down the number of Calories contained by the various meals, snacks, rations, etc. that they've brought with them, one item per line. Each Elf separates their own inventory from the previous Elf's inventory (if any) by a blank line.
 
     For example, suppose the Elves finish writing their items' Calories and end up with the following list:
@@ -35,22 +35,13 @@ def parse_elves() -> List[int]:
     The fifth Elf is carrying one food item with 10000 Calories.
     In case the Elves get hungry and need extra snacks, they need to know which Elf to ask: they'd like to know how many Calories are being carried by the Elf carrying the most Calories. In the example above, this is 24000 (carried by the fourth Elf).
     """
-    input_file = Path('data/elf_calories.txt')
     elves: List[int] = []
     elf_calories: int = 0
-    with input_file.open() as fhl:
-        for line in fhl.readlines():
-            line = line.strip()
-            if line:
-                elf_calories += int(line)
-                continue
-            elves.append(elf_calories)
-            elf_calories = 0
-    return elves
-
-def most_calories(number: int) -> int:
-    """Calculate total calories for the <number> highest calorie elves"""
-    elves = parse_elves()
-    return sum(
-        sorted(elves, reverse=True)[:number]
-    )
+    for line in iterate_over_data('data/elf_calories.txt'):
+        line = line.strip()
+        if line:
+            elf_calories += int(line)
+            continue
+        elves.append(elf_calories)
+        elf_calories = 0
+    return sum(sorted(elves, reverse=True)[:number])
