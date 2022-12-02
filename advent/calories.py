@@ -7,7 +7,7 @@ from .utils import iterate_over_data
 # https://adventofcode.com/2022/day/1
 #
 
-def elven_calories(number: int) -> int:
+def total(number: int) -> int:
     """The Elves take turns writing down the number of Calories contained by the various meals, snacks, rations, etc. that they've brought with them, one item per line. Each Elf separates their own inventory from the previous Elf's inventory (if any) by a blank line.
 
     For example, suppose the Elves finish writing their items' Calories and end up with the following list:
