@@ -8,11 +8,22 @@ packages = [{include = "advent"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+typer = {extras = ["all"], version = "^0.7.0"}
 
 
 [tool.poetry.group.dev.dependencies]
 ptpython = "^3.0.21"
+ipdb = "^0.13.9"
+pytest = "^7.2.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+advent = "advent.cli:app"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
