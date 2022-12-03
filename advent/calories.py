@@ -37,8 +37,7 @@ def total(number: int) -> int:
     """
     elves: List[int] = []
     elf_calories: int = 0
-    for line in iterate_over_data('data/elf_calories.txt'):
-        line = line.strip()
+    for line in iterate_over_data('elf_calories.txt'):
         if line:
             elf_calories += int(line)
             continue

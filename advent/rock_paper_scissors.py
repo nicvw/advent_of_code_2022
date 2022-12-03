@@ -23,7 +23,7 @@ Round = Tuple[str, str]
 
 def rounds_from_datafile() -> Iterator[Round]:
     """Convert lines of data into a Tuple"""
-    for line in iterate_over_data('data/rock_paper_scissors.txt'):
+    for line in iterate_over_data('rock_paper_scissors.txt'):
         p1, p2 = line.split()[:2]
         yield p1, p2
 
