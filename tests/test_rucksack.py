@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Tuple
 
-from advent.rucksack import find_overlap, priority, split
+from advent.rucksack import find_overlap, overlap_wrapper, priority, split
 
 
 @dataclass
@@ -45,17 +45,25 @@ class TestSplit:
 
 @dataclass
 class OverlapTestData:
-    input: Tuple[str, str]
+    input: Tuple[str, ...]
     output: str
 
 
-class TestFindOverlap:
+class TestOverWrapper:
     data = [
         OverlapTestData(input=("vJrwpWtwJgWr", "hcsFMMfFFhFp",), output="p"),
         OverlapTestData(input=("jqHRNqRjqzjGDLGL", "rsFMfFZSrLrFZsSL"), output="L"),
         OverlapTestData(input=("PmmdzqPrV", "vPwwTWBwg",), output="P"),
+        OverlapTestData(
+            input=("vJrwpWtwJgWrhcsFMMfFFhFp", "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL", "PmmdzqPrVvPwwTWBwg"),
+            output="r"
+        ),
+        OverlapTestData(
+            input=("wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn", "ttgJtRGJQctTZtZT", "CrZsJsPPZsGzwwsLwLmpwMDw"),
+            output="Z"
+        ),
     ]
 
-    def test_find_overlap(self):
+    def test_overlap_wrapper(self):
         for i in self.data:
-            assert find_overlap(*i.input) == i.output
+            assert overlap_wrapper(*i.input) == i.output

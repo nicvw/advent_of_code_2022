@@ -3,7 +3,7 @@ from rich import print
 
 from advent.calories import total
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
-from advent.rucksack import process_rucksacks_from_data
+from advent.rucksack import auth_stickers, reorder_rucksacks
 
 app = typer.Typer()
 
@@ -21,4 +21,8 @@ def rock_paper_scissors(convert: bool = typer.Option(default=False)):
 
 @app.command()
 def rucksack():
-    print(process_rucksacks_from_data())
+    print(reorder_rucksacks())
+
+@app.command()
+def stickers():
+    print(auth_stickers())

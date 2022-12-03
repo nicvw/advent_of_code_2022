@@ -1,3 +1,4 @@
+from functools import reduce
 import string
 from typing import List, Tuple
 
@@ -17,10 +18,21 @@ def split(backpack: str) -> Tuple[str, str]:
 def find_overlap(first: str, second: str) -> str:
     s1 = set(list(first))
     s2 = set(list(second))
-    return (s1 & s2).pop()
+    return "".join(list(s1 & s2))
 
-def process_rucksacks_from_data():
+def reorder_rucksacks():
     overlap: List[str] = []
-    for backpack in iterate_over_data('data/rucksack.txt'):
+    for backpack in iterate_over_data('rucksack.txt'):
         overlap.append(find_overlap(*split(backpack)))
     return sum([priority(x) for x in overlap])
+
+def overlap_wrapper(*args: str) -> str:
+    return reduce(find_overlap, args)
+
+def auth_stickers() -> int:
+    rucksacks = iterate_over_data('rucksack.txt')
+    overlap: List[str] = []
+    for r1, r2, r3 in zip(rucksacks, rucksacks, rucksacks):
+        overlap.append(overlap_wrapper(r1, r2, r3))
+    return sum([priority(x) for x in overlap])
+
