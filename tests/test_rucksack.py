@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Tuple
 
-from advent.rucksack import find_overlap, overlap_wrapper, priority, split
+from advent.rucksack import overlap_wrapper, priority, split
 
 
 @dataclass
