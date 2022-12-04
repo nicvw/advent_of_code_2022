@@ -2,6 +2,7 @@ import typer
 from rich import print
 
 from advent.calories import total
+from advent.camp_cleanup import overlapping_pairs
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
 from advent.rucksack import auth_stickers, reorder_rucksacks
 
@@ -26,3 +27,7 @@ def rucksack():
 @app.command()
 def stickers():
     print(auth_stickers())
+
+@app.command()
+def overlapping_sections():
+    print(overlapping_pairs())
