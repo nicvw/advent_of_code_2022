@@ -5,6 +5,8 @@ from advent.calories import total
 from advent.camp_cleanup import containing_pairs, overlapping_pairs
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
 from advent.rucksack import auth_stickers, reorder_rucksacks
+from advent.stacks import SupplyStacks
+from advent.utils import iterate_over_data
 
 app = typer.Typer()
 
@@ -35,3 +37,21 @@ def containing_sections():
 @app.command()
 def overlapping_sections():
     print(overlapping_pairs())
+
+
+@app.command()
+def stacks(multi: bool = typer.Option(default=False)):
+    stacks = [
+        ["Z", "J", "N", "W", "P", "S"],
+        ["G", "S", "T"],
+        ["V", "Q", "R", "L", "H"],
+        ["V", "S", "T", "D"],
+        ["Q", "Z", "T", "D", "B", "M", "J"],
+        ["M", "W", "T", "J", "D", "C", "Z", "L"],
+        ["L", "P", "M", "W", "G", "T", "J"],
+        ["N", "G", "M", "T", "B", "F", "Q", "H"],
+        ["R", "D", "G", "C", "P", "B", "Q", "W"]
+    ]
+    var = SupplyStacks(moves=iterate_over_data("stack_moves.txt"), stacks=stacks)
+    var.move(multi=multi)
+    print("".join([x[-1] for x in var.stacks]))
