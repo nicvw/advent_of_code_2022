@@ -1,8 +1,10 @@
+from io import StringIO
 import typer
 from rich import print
 
 from advent.calories import total
 from advent.camp_cleanup import containing_pairs, overlapping_pairs
+from advent.comm_device import SignalDecoder
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
 from advent.rucksack import auth_stickers, reorder_rucksacks
 from advent.stacks import SupplyStacks
@@ -38,7 +40,6 @@ def containing_sections():
 def overlapping_sections():
     print(overlapping_pairs())
 
-
 @app.command()
 def stacks(multi: bool = typer.Option(default=False)):
     stacks = [
@@ -55,3 +56,10 @@ def stacks(multi: bool = typer.Option(default=False)):
     var = SupplyStacks(moves=iterate_over_data("stack_moves.txt"), stacks=stacks)
     var.move(multi=multi)
     print("".join([x[-1] for x in var.stacks]))
+
+@app.command()
+def communicator():
+    stream = StringIO(next(iterate_over_data("signal.txt")))
+    decoder = SignalDecoder(stream)
+    decoder.process_data()
+    print(f"start of packet: {decoder.start_of_packet}, start of message: {decoder.start_of_message}")
