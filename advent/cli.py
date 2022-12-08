@@ -8,6 +8,7 @@ from advent.comm_device import SignalDecoder
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
 from advent.rucksack import auth_stickers, reorder_rucksacks
 from advent.stacks import SupplyStacks
+from advent.storage_device import Storage
 from advent.utils import iterate_over_data
 
 app = typer.Typer()
@@ -63,3 +64,8 @@ def communicator():
     decoder = SignalDecoder(stream)
     decoder.process_data()
     print(f"start of packet: {decoder.start_of_packet}, start of message: {decoder.start_of_message}")
+
+@app.command()
+def storage():
+    storage = Storage(iterate_over_data("storage_device.txt"))
+    print(sum([v for v in storage.directories.values() if v <= 100000]))
