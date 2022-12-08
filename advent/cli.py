@@ -9,6 +9,7 @@ from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally
 from advent.rucksack import auth_stickers, reorder_rucksacks
 from advent.stacks import SupplyStacks
 from advent.storage_device import Storage
+from advent.trees import TreeTops
 from advent.utils import iterate_over_data
 
 app = typer.Typer()
@@ -78,3 +79,13 @@ def storage():
 def freeup_storage():
     storage = Storage(iterate_over_data("storage_device.txt"))
     print(storage.freeup_space(30000000))
+
+#
+# twas the eighth day of xmas...
+#
+
+@app.command()
+def tree_tops():
+    ttops = TreeTops(iterate_over_data("trees.txt"))
+    ttops()
+    print(ttops.trees)
