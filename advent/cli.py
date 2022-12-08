@@ -65,7 +65,16 @@ def communicator():
     decoder.process_data()
     print(f"start of packet: {decoder.start_of_packet}, start of message: {decoder.start_of_message}")
 
+#
+# twas the seventh day of xmas...
+#
+
 @app.command()
 def storage():
     storage = Storage(iterate_over_data("storage_device.txt"))
     print(sum([v for v in storage.directories.values() if v <= 100000]))
+
+@app.command()
+def freeup_storage():
+    storage = Storage(iterate_over_data("storage_device.txt"))
+    print(storage.freeup_space(30000000))

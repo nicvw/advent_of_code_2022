@@ -1,3 +1,7 @@
+#
+# twas the seventh day of xmas...
+#
+
 from textwrap import dedent
 import pytest
 from typing import Iterable
@@ -33,10 +37,16 @@ def test_data() -> Iterable[str]:
     7214296 k""").split("\n")
     return iter([x for x in data if x])
 
-def test_storage(test_data: Iterable[str]):
-    iut = Storage(test_data)
-    assert iut.directories["e"] == 584
-    assert iut.directories["a"] == 94853
-    assert iut.directories["d"] == 24933642
+@pytest.fixture
+def iut(test_data: Iterable[str]):
+    return Storage(test_data)
+
+def test_storage(iut: Storage):
+    assert iut.directories["/a/e"] == 584
+    assert iut.directories["/a"] == 94853
+    assert iut.directories["/d"] == 24933642
     assert iut.directories["/"] == 48381165
     assert sum([v for v in iut.directories.values() if v <= 100000]) == 95437
+
+def test_freeup_space(iut: Storage):
+    assert iut.freeup_space(30000000) == ("/d", 24933642)
