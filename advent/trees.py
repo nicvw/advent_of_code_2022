@@ -9,12 +9,43 @@ Row = List[int]
 Coordinate = Tuple[int, int]
 
 @dataclass
+class TreeSurveyor:
+    trees: List[int]
+    viable: Set[int] = field(default_factory=set)
+    index: int = 0
+    highest: int = field(init=False)
+
+    def __post_init__(self):
+        self.index = len(self.trees) - 1
+        self.highest = self.trees[0]
+
+    def __call__(self):
+        self._compare(1)
+        self.highest = self.trees[-1]
+        self._compare(len(self.trees) - 2)
+        return self.viable
+
+    def _compare(self, start: int):
+        index = self.index
+        self.index = 0 if start < index else -1
+        for i in range(start, index, 1 if start < index else -1):
+            if self.highest == 9:
+                break
+            elif self.trees[i] > self.highest:
+                self.viable.add(i)
+                self.highest = self.trees[i]
+                self.index = i - 1
+            elif self.trees[i] == self.highest:
+                self.index = i - 1
+
+@dataclass
 class TreeTops:
     input: Iterator[str]
     rows: List[Row] = field(default_factory=list)
     max_x: int = field(init=False)
     max_y: int = field(init=False)
     coordinates: Set[Coordinate] = field(default_factory=set)
+    # max_score: Tuple[Coordinate, int] = field(init=False)
 
     def __post_init__(self):
         for row in self.input:
@@ -31,46 +62,38 @@ class TreeTops:
             self.coordinates.add((self.max_x - 1, y))
 
     def __call__(self):
-        # print("")
         # process rows
         for y in range(1, self.max_y - 1):
-            # top -> down
-            max_height=self.rows[y][0]
-            self._row(y=y, start=1, end=self.max_x - 1, max_height=max_height)
-            # bottom -> up
-            max_height=self.rows[y][-1]
-            self._row(y=y, start=self.max_x - 2, end=0, step=-1 , max_height=max_height)
+            surveyor = TreeSurveyor(self.rows[y])
+            for x in surveyor():
+                self.coordinates.add((x, y))
 
         # process columns
         for x in range(1, self.max_x - 1):
-            # top -> down
-            max_height = self.rows[0][x]
-            self._column(x, 1, self.max_y - 1, max_height)
-            # bottom -> up
-            max_height = self.rows[-1][x]
-            self._column(x=x, start=self.max_y - 2, end=0, max_height=max_height, step=-1)
+            surveyor = TreeSurveyor([r[x] for r in self.rows])
+            for y in surveyor():
+                self.coordinates.add((x, y))
 
     @property
     def trees(self) -> int:
         return len(self.coordinates)
 
-    def _tree(self, x: int, y: int, max_height: int) -> int:
-        # print(f"col: {x}, row: {y}")
-        if self.rows[y][x] > max_height:
-            self.coordinates.add((x, y))
-            max_height = self.rows[y][x]
-        return max_height
+    def _score_row(self, x: int, y: int, height: int, reverse: bool = False) -> int:
+        score = 0
+        row = self.rows[y]
+        trees = row[x+1:] if reverse else row[x-1::-1]
+        for tree in trees:
+            score += 1
+            if tree >= height:
+                break
+        return score
 
-    def _row(self, y: int, start: int, end: int, max_height: int, step: int = 1):
-        for x in range(start, end, step):
-            if max_height == 9:
-                # print("break: max height reached")
-                return
-            max_height = self._tree(x, y, max_height)
-
-    def _column(self, x: int, start: int, end: int, max_height: int, step: int = 1):
-        for y in range(start, end, step):
-            if max_height == 9:
-                # print("break: max height reached")
-                return
-            max_height = self._tree(x, y, max_height)
+    def _score_column(self, x: int, y: int, height: int, reverse: bool = False) -> int:
+        score = 0
+        column = [row[x] for row in self.rows]
+        trees = column[y+1:] if reverse else column[y-1::-1]
+        for tree in trees:
+            score += 1
+            if tree >= height:
+                break
+        return score
