@@ -1,3 +1,7 @@
+#
+# twas the eighth day of xmas...
+#
+
 from textwrap import dedent
 from typing import  Iterator, List
 import pytest
@@ -37,5 +41,5 @@ def test_instantiation(iut: TreeTops, test_data: List[List[str]]):
 
 def test_tree_tops(iut: TreeTops, test_data: List[List[str]]):
     iut()
-    assert iut.trees == 19
+    assert iut.trees == 21
     print(iut.coordinates)
