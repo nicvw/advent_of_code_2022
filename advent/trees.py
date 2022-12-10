@@ -3,9 +3,9 @@
 #
 
 from dataclasses import dataclass, field
-from typing import Iterator, List, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
-Row = List[int]
+Trees = List[int]
 Coordinate = Tuple[int, int]
 
 @dataclass
@@ -38,18 +38,16 @@ class TreeSurveyor:
             elif self.trees[i] == self.highest:
                 self.index = i - 1
 
+
 @dataclass
 class TreeTops:
-    input: Iterator[str]
-    rows: List[Row] = field(default_factory=list)
+    # input: Iterator[str]
+    rows: List[Trees]
+    coordinates: Set[Coordinate] = field(default_factory=set)
     max_x: int = field(init=False)
     max_y: int = field(init=False)
-    coordinates: Set[Coordinate] = field(default_factory=set)
-    # max_score: Tuple[Coordinate, int] = field(init=False)
 
     def __post_init__(self):
-        for row in self.input:
-            self.rows.append([int(x) for x in row])
         self.max_x = len(self.rows[0])
         self.max_y = len(self.rows)
 
@@ -66,34 +64,79 @@ class TreeTops:
         for y in range(1, self.max_y - 1):
             surveyor = TreeSurveyor(self.rows[y])
             for x in surveyor():
+                if (x, y) in self.coordinates:
+                    continue
                 self.coordinates.add((x, y))
 
         # process columns
         for x in range(1, self.max_x - 1):
             surveyor = TreeSurveyor([r[x] for r in self.rows])
             for y in surveyor():
+                if (x, y) in self.coordinates:
+                    continue
                 self.coordinates.add((x, y))
 
     @property
     def trees(self) -> int:
         return len(self.coordinates)
 
-    def _score_row(self, x: int, y: int, height: int, reverse: bool = False) -> int:
-        score = 0
-        row = self.rows[y]
-        trees = row[x+1:] if reverse else row[x-1::-1]
-        for tree in trees:
-            score += 1
-            if tree >= height:
-                break
-        return score
 
-    def _score_column(self, x: int, y: int, height: int, reverse: bool = False) -> int:
-        score = 0
-        column = [row[x] for row in self.rows]
-        trees = column[y+1:] if reverse else column[y-1::-1]
-        for tree in trees:
-            score += 1
-            if tree >= height:
-                break
-        return score
+@dataclass
+class ViewScoreCalculator:
+    """Calculate the product of the view distance from the tree"""
+    index: int
+    trees: Trees
+    scores: List[int] = field(default_factory=list)
+    before: int = 0
+    behind: int = 0
+    height: int = field(init=False)
+
+    def __post_init__(self):
+        self.height = self.trees[self.index]
+
+    def __call__(self) -> int:
+        for i, height in enumerate(self.trees):
+            if i < self.index:
+                if height < self.height:
+                    self.before += 1
+                else:
+                    self.before = 1
+            elif i > self.index:
+                if height < self.height:
+                    self.behind += 1
+                else:
+                    self.behind += 1
+                    break
+        return self.before * self.behind
+
+
+@dataclass
+class ViewFinder:
+    """Process rows of trees for find the tree with the highest view score"""
+    trees: List[Trees]
+    score: int = 0
+    coordinate: Coordinate = field(init=False)
+
+    def __call__(self) -> Dict[str, int | Coordinate]:
+        max_x = len(self.trees[0])
+        max_y = len(self.trees)
+        for x in range(max_x):
+            if x == 0 or x == max_x - 1:
+                continue
+            for y in range(len(self.trees)):
+                if y == 0 or y == max_y - 1:
+                    continue
+                self._calculate_view_score(x, y)
+
+        return {
+            "score": self.score,
+            "coordinate": self.coordinate
+        }
+
+    def _calculate_view_score(self, x: int, y: int):
+        row_calc = ViewScoreCalculator(x, self.trees[y])
+        col_calc = ViewScoreCalculator(y, [r[x] for r in self.trees])
+        score = row_calc() * col_calc()
+        if score > self.score:
+            self.score = score
+            self.coordinate = (x, y)

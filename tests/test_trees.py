@@ -2,24 +2,16 @@
 # twas the eighth day of xmas...
 #
 
-from textwrap import dedent
-from typing import  Iterator, List, Set
+from dataclasses import dataclass
+from typing import List, Set
 import pytest
 
-from advent.trees import TreeSurveyor, TreeTops
+from advent.trees import TreeSurveyor, TreeTops, ViewFinder, ViewScoreCalculator
+
+TestData = List[List[int]]
 
 @pytest.fixture()
-def test_input() -> Iterator[str]:
-    data = dedent("""
-    30373
-    25512
-    65332
-    33549
-    35390""").splitlines()
-    return iter(x for x in data if x)
-
-@pytest.fixture()
-def test_data() -> List[List[int]]:
+def test_data() -> TestData:
     return [
         [3, 0, 3, 7, 3],
         [2, 5, 5, 1, 2],
@@ -39,8 +31,8 @@ def test_viable() -> List[Set[int]]:
     ]
 
 @pytest.fixture()
-def treetops(test_input: Iterator[str]):
-    return TreeTops(input=test_input)
+def treetops(test_data: TestData):
+    return TreeTops(rows=test_data)
 
 def test_instantiation(treetops: TreeTops, test_data: List[List[str]]):
     assert treetops.rows == test_data
@@ -51,9 +43,49 @@ def test_instantiation(treetops: TreeTops, test_data: List[List[str]]):
 def test_tree_tops(treetops: TreeTops):
     treetops()
     assert treetops.trees == 21
-    print(treetops.coordinates)
+    # assert treetops.high_score == 8
+    # assert treetops.best_location == (2, 3)
 
-def test_tree_surveyor(test_data: List[List[int]], test_viable: List[Set[int]]):
+def test_tree_surveyor(test_data: TestData, test_viable: List[Set[int]]):
     for trees, viable in zip(test_data, test_viable):
         surveyor = TreeSurveyor(trees)
         assert surveyor() == viable
+
+
+@dataclass
+class ViewScoreCalculatorCreator:
+    trees: List[int]
+    index: int
+    output: int
+
+    @property
+    def calculator(self):
+        return ViewScoreCalculator(self.index, self.trees)
+
+
+class TestViewScoreCalculator:
+    tests = [
+        ViewScoreCalculatorCreator(
+            trees=[3, 3, 5, 4, 9],
+            index=2,
+            output=4
+        ),
+        ViewScoreCalculatorCreator(
+            trees=[3, 5, 3, 5, 3],
+            index=3,
+            output=2
+        ),
+    ]
+
+    def test_calculator(self):
+        for t in self.tests:
+            assert t.calculator() == t.output
+
+
+def test_view_finder(test_data: TestData):
+    view_finder = ViewFinder(test_data)
+    output = {
+            "score": 8,
+            "coordinate": (2, 3)
+        }
+    assert view_finder() == output

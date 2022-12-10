@@ -9,7 +9,7 @@ from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally
 from advent.rucksack import auth_stickers, reorder_rucksacks
 from advent.stacks import SupplyStacks
 from advent.storage_device import Storage
-from advent.trees import TreeTops
+from advent.trees import TreeTops, ViewFinder
 from advent.utils import iterate_over_data
 
 app = typer.Typer()
@@ -86,6 +86,9 @@ def freeup_storage():
 
 @app.command()
 def tree_tops():
-    ttops = TreeTops(iterate_over_data("trees.txt"))
+    trees = [[int(y) for y in x] for x in iterate_over_data("trees.txt")]
+    ttops = TreeTops(trees)
     ttops()
-    print(ttops.trees)
+    print(f"viable trees:{ttops.trees}")
+    best_view = ViewFinder(trees)
+    print("score: {score}, coordinate: {coordinate}".format(**best_view()))
