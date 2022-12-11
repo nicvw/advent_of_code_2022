@@ -6,6 +6,7 @@ from advent.calories import total
 from advent.camp_cleanup import containing_pairs, overlapping_pairs
 from advent.comm_device import SignalDecoder
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
+from advent.rope import Orchestrator
 from advent.rucksack import auth_stickers, reorder_rucksacks
 from advent.stacks import SupplyStacks
 from advent.storage_device import Storage
@@ -92,3 +93,14 @@ def tree_tops():
     print(f"viable trees:{ttops.trees}")
     best_view = ViewFinder(trees)
     print("score: {score}, coordinate: {coordinate}".format(**best_view()))
+
+#
+# twas the ninth day of xmas...
+#
+
+@app.command()
+def rope():
+    moves = [(x, int(y)) for x, y in [m.split() for m in iterate_over_data("rope.txt")]]
+    orch = Orchestrator(moves=moves) # type: ignore
+    orch()
+    print(len(orch.tail.history))
