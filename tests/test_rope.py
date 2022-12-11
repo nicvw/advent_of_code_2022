@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Set
 
-from advent.rope import Motion, Orchestrator, PositionTracker
+from advent.rope import Motion, Rope, Knot
 from advent.trees import Coordinate
 
 
@@ -21,7 +21,7 @@ class RelativePositionTest:
     adjacent: bool
 
 
-class TestPositionTracker:
+class TestKnot:
     positional_tests = [
         RelativePositionTest(head=(0, 0), tail=(0, 0), aligned=True, adjacent=False),
         RelativePositionTest(head=(1, 0), tail=(1, 1), aligned=True, adjacent=True),
@@ -40,17 +40,16 @@ class TestPositionTracker:
 
     def test_position(self):
         for t in self.positional_tests:
-            head = PositionTracker(*t.head)
-            tail = PositionTracker(*t.tail)
-            assert head.aligned(tail) == t.aligned
+            head = Knot(*t.head)
+            tail = Knot(*t.tail)
             assert head.adjacent(tail) == t.adjacent
     
     def test_equality(self):
-        assert PositionTracker(1, 2) == PositionTracker(1, 2)
-        assert PositionTracker(1, 2) != PositionTracker(2, 3)
-        pt = PositionTracker(1, 1)
+        assert Knot(1, 2) == Knot(1, 2)
+        assert Knot(1, 2) != Knot(2, 3)
+        pt = Knot(1, 1)
         pt.move(0, 1)
-        assert pt == PositionTracker(1, 2)
+        assert pt == Knot(1, 2)
 
 
 @dataclass
@@ -58,12 +57,11 @@ class OrchestratorTest:
     moves: List[Motion]
     history: Set[Coordinate]
     history_length: int
-    head: PositionTracker = field(default_factory=PositionTracker)
-    tail: PositionTracker = field(default_factory=PositionTracker)
-    orchestrator: Orchestrator = field(init=False)
+    knots: int = 2
+    rope: Rope = field(init=False)
 
     def __post_init__(self):
-        self.orchestrator = Orchestrator(self.moves, self.head, self.tail)
+        self.rope = Rope(self.moves, [Knot() for _ in range(self.knots)])
     
 
 class TestOrchestrator:
@@ -124,6 +122,6 @@ class TestOrchestrator:
 
     def test_orchestrator(self):
         for t in self.tests:
-            t.orchestrator()
-            assert t.tail.history == t.history
-            assert len(t.tail.history) == t.history_length
+            t.rope()
+            assert t.rope.knots[-1].history == t.history
+            assert len(t.rope.knots[-1].history) == t.history_length

@@ -13,7 +13,7 @@ Motion = Tuple[Direction, int]
 
 
 @dataclass
-class PositionTracker:
+class Knot:
     x: int = field(default=0)
     y: int = field(default=0)
     history: Set[Coordinate] = field(default_factory=set)
@@ -37,14 +37,14 @@ class PositionTracker:
     def position(self) -> Coordinate:
         return self.x, self.y
 
-    def adjacent(self, other: PositionTracker) -> bool:
+    def adjacent(self, other: Knot) -> bool:
         return other.position in self.neighbours
 
-    def relative(self, other: PositionTracker) -> Coordinate:
+    def relative(self, other: Knot) -> Coordinate:
         return (other.x - self.x, other.y - self.y)
 
-    def aligned(self, other: PositionTracker) -> bool:
-        return self.x == other.x or self.y == other.y
+    # def aligned(self, other: Knot) -> bool:
+    #     return self.x == other.x or self.y == other.y
 
     def move(self, x: int, y: int):
         self.x += x
@@ -56,10 +56,12 @@ class PositionTracker:
 
 
 @dataclass
-class Orchestrator:
+class Rope:
     moves: List[Motion]
-    head: PositionTracker = field(default_factory=PositionTracker)
-    tail: PositionTracker = field(default_factory=PositionTracker)
+    knots: List[Knot]
+
+    # head: Knot = field(default_factory=Knot)
+    # tail: Knot = field(default_factory=Knot)
 
     @property
     def U(self) -> Coordinate:
@@ -77,26 +79,27 @@ class Orchestrator:
     def R(self) -> Coordinate:
         return (1, 0)
 
-    @property
-    def _aligned(self):
-        return self.tail.aligned(self.head)
-
     def __call__(self):
         for direction, num in self.moves:
             self.move(direction=direction, num=num)
     
     def move(self, direction: Direction, num: int):
         for _ in range(num):
-            move = getattr(self, direction)
-            self.head.move(*move)
+            move: Coordinate = getattr(self, direction)
+            for i, knot in enumerate(self.knots):
+                if i == 0:
+                    knot.move(*move)
+                    continue
 
-            if self.tail.adjacent(self.head) or self.head == self.tail:
-                continue
+                previous_knot = self.knots[i-1]
 
-            if self.tail.y - self.head.y in (-2, 2):
-                move = self.head.x - self.tail.x, move[1]
-            elif self.tail.x - self.head.x in (-2, 2):
-                move = move[0], self.head.y - self.tail.y
+                if knot.adjacent(previous_knot) or previous_knot == knot:
+                    continue
 
-            self.tail.move(*move)
+                if knot.y - previous_knot.y in (-2, 2):
+                    move = previous_knot.x - knot.x, move[1]
+                elif knot.x - previous_knot.x in (-2, 2):
+                    move = move[0], previous_knot.y - knot.y
+
+                knot.move(*move)
 
