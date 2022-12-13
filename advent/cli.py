@@ -6,7 +6,7 @@ from advent.calories import total
 from advent.camp_cleanup import containing_pairs, overlapping_pairs
 from advent.comm_device import SignalDecoder
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
-from advent.rope import Knot, Rope
+from advent.rope import Knot, Plotter, Rope, load_rope
 from advent.rucksack import auth_stickers, reorder_rucksacks
 from advent.stacks import SupplyStacks
 from advent.storage_device import Storage
@@ -99,8 +99,11 @@ def tree_tops():
 #
 
 @app.command()
-def rope(knots: int = typer.Option(default=1)):
-    moves = [(x, int(y)) for x, y in [m.split() for m in iterate_over_data("rope.txt")]]
-    rope = Rope(moves=moves, knots=[Knot() for _ in range(knots)]) # type: ignore
+def rope(datafile: typer.FileText = typer.Option(default="data/rope.txt"), knots: int = typer.Option(default=1), plot: bool = typer.Option(default=False)):
+    moves = load_rope(datafile)
+    rope = Rope(moves=moves, knots=[Knot() for _ in range(knots + 1)])
     rope()
-    print(len(rope.knots[-1].history))
+    print(len(set(rope.knots[-1].history)))
+    if plot:
+        plotter = Plotter(rope)
+        plotter.play()

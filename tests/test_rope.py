@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Set
+from typing import List
 
 from advent.rope import Motion, Rope, Knot
 from advent.trees import Coordinate
@@ -55,9 +55,8 @@ class TestKnot:
 @dataclass
 class OrchestratorTest:
     moves: List[Motion]
-    history: Set[Coordinate]
-    history_length: int
-    knots: int = 2
+    history: int
+    knots: int = field(default=2)
     rope: Rope = field(init=False)
 
     def __post_init__(self):
@@ -68,60 +67,80 @@ class TestOrchestrator:
     tests = [
         OrchestratorTest(
             moves=[('R', 1), ('R', 1)],
-            history={(0, 0), (1, 0)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('L', 1), ('L', 1)],
-            history={(0, 0), (-1, 0)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('U', 1), ('U', 1)],
-            history={(0, 0), (0, 1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('D', 1), ('D', 1)],
-            history={(0, 0), (0, -1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('R', 1), ('U', 2)],
-            history={(0, 0), (1, 1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('L', 1), ('U', 2)],
-            history={(0, 0), (-1, 1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('R', 1), ('D', 2)],
-            history={(0, 0), (1, -1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('L', 1), ('D', 2)],
-            history={(0, 0), (-1, -1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('U', 1), ('R', 2)],
-            history={(0, 0), (1, 1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('U', 1), ('L', 2)],
-            history={(0, 0), (-1, 1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('D', 1), ('R', 2)],
-            history={(0, 0), (1, -1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('D', 1), ('L', 2)],
-            history={(0, 0), (-1, -1)},
-            history_length=2),
+            history=2
+        ),
         OrchestratorTest(
             moves=[('R', 4), ('U', 4), ('L', 3), ('D', 1), ('R', 4), ('D', 1), ('L', 5), ('R', 2)],
-            history={(0, 0), (1, 0), (2, 0), (3, 0), (4, 1), (4, 2), (3, 2), (2, 2), (1, 2), (3, 3), (4, 3), (2, 4), (3, 4)},
-            history_length=13),
+            history=13
+        ),
+        OrchestratorTest(
+            moves=[("R", 9)],
+            knots=5,
+            history=6
+        ),
+        OrchestratorTest(
+            moves=[("R", 20), ("L", 10)],
+            knots=5,
+            history=17
+        ),
+        OrchestratorTest(
+            moves=[("R", 10), ("U", 5)],
+            knots=5,
+            history=12
+        ),
+        # OrchestratorTest(
+        #     moves=[("R", 5), ("U", 8), ("L", 8), ("D", 3), ("R", 17), ("D", 10), ("L", 25), ("U", 20)],
+        #     knots=9,
+        #     history=36
+        # )
+
     ]
 
     def test_orchestrator(self):
         for t in self.tests:
             t.rope()
-            assert t.rope.knots[-1].history == t.history
-            assert len(t.rope.knots[-1].history) == t.history_length
+            assert len(set(t.rope.knots[-1].history)) == t.history
