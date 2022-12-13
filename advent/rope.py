@@ -40,6 +40,9 @@ class Knot:
     def position(self) -> Coordinate:
         return self.x, self.y
 
+    def aligned(self, other: Knot) -> bool:
+        return self.x == other.x or self.y == other.y
+
     def adjacent(self, other: Knot) -> bool:
         return other.position in self.neighbours
 
@@ -80,23 +83,30 @@ class Rope:
     def move(self, direction: Direction, num: int):
         for _ in range(num):
             move: Coordinate = getattr(self, direction)
-            for i in range(len(self.knots)):
+            for i, knot in enumerate(self.knots):
                 if i == 0:
-                    self.knots[i].move(*move)
+                    knot.move(*move)
                     continue
 
                 previous_knot = self.knots[i-1]
 
-                if self.knots[i].adjacent(previous_knot) or previous_knot == self.knots[i]:
-                    self.knots[i].move(0, 0)
+                if knot.adjacent(previous_knot) or previous_knot == knot:
+                    knot.move(0, 0)
                     continue
 
-                if self.knots[i].y - previous_knot.y not in (-1, 0, 1):
-                    move = previous_knot.x - self.knots[i].x, move[1]
-                elif self.knots[i].x - previous_knot.x not in (-1, 0, 1):
-                    move = move[0], previous_knot.y - self.knots[i].y
+                if knot.aligned(previous_knot):
+                    x = 0
+                    y = 0
+                    if knot.x == previous_knot.x:                    
+                        y = 1 if previous_knot.y > knot.y else -1
+                    else:
+                        x = 1 if previous_knot.x > knot.x else -1
+                    knot.move(x, y)
+                    continue
 
-                self.knots[i].move(*move)
+                x = 1 if previous_knot.x > knot.x else -1
+                y = 1 if previous_knot.y > knot.y else -1
+                knot.move(x, y)
 
 
 @dataclass
@@ -107,7 +117,6 @@ class Plotter:
     max_moves: int = field(init=False)
     rows: int = field(init=False)
     cols: int = field(init=False)
-
 
     def __post_init__(self):
         self.max_moves = len(self.rope.knots[0].history)
@@ -122,21 +131,20 @@ class Plotter:
                 min_x = x if x < min_x else min_x
                 min_y = y if y < min_y else min_y
         self.offset = (0 - min_x, 0 - min_y)
-        self.cols = max_x - min_x
-        self.rows = max_y - min_y
+        self.cols = max_x - min_x + 1
+        self.rows = max_y - min_y + 1
         self._blank_graph()
-        self.graph[0 + self.offset[1]][0 + self.offset[0]] = "0"
 
     def _blank_graph(self):
         self.graph = [["." for _ in range(self.cols)] for _ in range(self.rows)]
+        self.graph[self.offset[1]][self.offset[0]] = "s"
 
     def _print(self, heading: str):
         print(f"== {heading} ==")
         print("")
-        for row in self.graph:
+        for row in self.graph[-1::-1]:
             print(" ".join(row))
         print("")
-
 
     def play(self):
         knots = len(self.rope.knots)
@@ -154,6 +162,14 @@ class Plotter:
                 self.graph[y + self.offset[1]][x + self.offset[0]] = f"{k}"
             self._print(f"{move} {num}")
             confirm("continue?", abort=True)
+        self.plot(len(self.rope.knots))
+
+    def plot(self, knot: int):
+        self._blank_graph()
+        for x, y in self.rope.knots[knot].history:
+            self.graph[y + self.offset[1]][x + self.offset[0]] = "#"
+        self.graph[self.offset[1]][self.offset[0]] = "s"
+        self._print(f"ALL POSITIONS FOR KNOT {knot}")
 
 
 def load_rope(data: TextIO) -> List[Motion]:

@@ -99,11 +99,18 @@ def tree_tops():
 #
 
 @app.command()
-def rope(datafile: typer.FileText = typer.Option(default="data/rope.txt"), knots: int = typer.Option(default=1), plot: bool = typer.Option(default=False)):
+def rope(
+    datafile: typer.FileText = typer.Option(default="data/rope.txt"),
+    knots: int = typer.Option(default=1),
+    plot: bool = typer.Option(default=False),
+    play: bool = typer.Option(default=False)
+    ):
     moves = load_rope(datafile)
     rope = Rope(moves=moves, knots=[Knot() for _ in range(knots + 1)])
     rope()
     print(len(set(rope.knots[-1].history)))
-    if plot:
-        plotter = Plotter(rope)
+    plotter = Plotter(rope)
+    if play:
         plotter.play()
+    if plot:
+        plotter.plot(knots)
