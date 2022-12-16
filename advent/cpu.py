@@ -4,6 +4,25 @@ from typing import List, Literal, TextIO, Tuple
 InstructionAction = Literal['addx', 'noop']
 Instruction = Tuple[InstructionAction, int]
 InstructionSet = List[Instruction]
+Sprite = Tuple[int, int, int]
+
+
+@dataclass
+class CRT:
+    cycle = 0
+    eol = 39
+
+    def tick(self, sprite: Sprite):
+        if self.cycle in sprite:
+            print("#", end="")
+        else:
+            print(".", end="")
+
+        if self.cycle == self.eol:
+            self.cycle = 0
+            print("")
+        else:
+            self.cycle += 1
 
 @dataclass
 class CPU:
@@ -12,10 +31,12 @@ class CPU:
     x_register: int = field(default=1)
     signal_cycle: int = field(default=20)
     signal_strength: List[int] = field(default_factory=list)
+    screen: CRT = field(default_factory=CRT)
 
     def _tick(self, cycles: int):
         for _ in range(cycles):
             self.cycles += 1
+            self.screen.tick(self._sprite())
             if self.cycles == self.signal_cycle:
                 self._signal_strength()
 
@@ -29,6 +50,9 @@ class CPU:
     def _addx(self, value: int):
         self._tick(2)
         self.x_register += value
+
+    def _sprite(self):
+        return (self.x_register - 1, self.x_register, self.x_register + 1)
 
     def __call__(self):
         for instruction in self.instructions:
