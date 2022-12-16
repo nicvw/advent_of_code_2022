@@ -28,4 +28,7 @@ advent = "advent.cli:app"
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
+    "--cov=advent",
+    "--cov-report=html",
+    "--cov-report=term"
 ]

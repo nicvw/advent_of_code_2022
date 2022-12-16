@@ -5,6 +5,7 @@ from rich import print
 from advent.calories import total
 from advent.camp_cleanup import containing_pairs, overlapping_pairs
 from advent.comm_device import SignalDecoder
+from advent.cpu import CPU, load_instructions
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
 from advent.rope import Knot, Plotter, Rope, load_rope
 from advent.rucksack import auth_stickers, reorder_rucksacks
@@ -114,3 +115,13 @@ def rope(
         plotter.play()
     if plot:
         plotter.plot(knots)
+
+#
+# twas the tenth day of xmas...
+#
+
+@app.command()
+def cpu(datafile: typer.FileText = typer.Option(default="data/cpu.txt")):
+    cpu = CPU(load_instructions(datafile))
+    cpu()
+    print(f"Total signal: {sum(cpu.signal_strength)}")
