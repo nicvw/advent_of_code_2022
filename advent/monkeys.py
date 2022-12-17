@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
+from math import lcm
 import re
 from rich import print
 from pydantic import BaseModel, Field
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 import yaml
 
 Operation = Callable[[int], int]
@@ -18,15 +19,15 @@ class Monkey:
     test: int
     true: int
     false: int
+    relief: int = field(default=3)
     operations: int = field(init=False, default=0)
 
-    def turn(self) -> List[Throw]:
+    def turn(self, common: int) -> List[Throw]:
         throws: List[Throw] = []
         for item in self.items:
             self.operations += 1
-            worry = self.operation(item)
-            worry = int(worry / 3)
-            throws.append((self.true if worry % self.test == 0 else self.false, worry))
+            worry = int(self.operation(item) / self.relief)
+            throws.append((self.true if worry % self.test == 0 else self.false, common + worry % common))
         self.items = []
         return throws
 
@@ -37,13 +38,14 @@ class MonkeyMaker(BaseModel):
     true: str = Field(alias="If true", )
     false: str = Field(alias="If false")
 
-    def create(self) -> Monkey:
+    def create(self, relief: int) -> Monkey:
         return Monkey(
             items=self._items,
             operation=self._operation,
             test=self._test,
             true=self._true,
-            false=self._false
+            false=self._false,
+            relief=relief
         )
 
     @property
@@ -81,19 +83,22 @@ class MonkeyMaker(BaseModel):
         return self._bool(self.false)
 
 
-class Monkeys(BaseModel):
+@dataclass
+class Monkeys:
     makers: Dict[str, Dict[str, str]]
-    monkeys: List[Monkey] = Field(default_factory=list)
+    relief: int
+    monkeys: List[Monkey] = field(default_factory=list)
+    lcm: int = field(init=False)
 
-    def __init__(self, **data: Any) -> None:
-        super().__init__(**data)
+    def __post_init__(self) -> None:
         for i in range(len(self.makers)):
             maker = MonkeyMaker(**self.makers[f"Monkey {i}"])
-            self.monkeys.append(maker.create())
+            self.monkeys.append(maker.create(self.relief))
+        self.lcm = lcm(*[m.test for m in self.monkeys])
 
     def round(self):
         for monkey in self.monkeys:
-            items = monkey.turn()
+            items = monkey.turn(self.lcm)
             for item in items:
                 self.monkeys[item[0]].items.append(item[1])
 

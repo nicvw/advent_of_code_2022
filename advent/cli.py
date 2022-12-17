@@ -133,9 +133,14 @@ def cpu(datafile: typer.FileText = typer.Option(default="data/cpu.txt")):
 #
 
 @app.command()
-def monkeys(rounds: int = typer.Argument(default=1), datafile: typer.FileText = typer.Option(default="data/monkeys.txt")):
+def monkeys(
+    rounds: int = typer.Argument(default=1),
+    relief: int = typer.Option(default=3),
+    datafile: typer.FileText = typer.Option(default="data/monkeys.txt")
+    ):
+
     data = monkey_loader(datafile.read())
-    monkeys = Monkeys(makers=data)
+    monkeys = Monkeys(makers=data, relief=relief)
     monkeys.play_rounds(rounds)
     print(json.dumps(monkeys.scores))
     sorted_scores = sorted(monkeys.scores.values(), reverse=True)

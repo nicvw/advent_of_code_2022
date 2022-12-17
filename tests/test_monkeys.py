@@ -22,7 +22,7 @@ def monkey_maker(monkey_dict: Dict[str, str]) -> MonkeyMaker:
 
 @pytest.fixture
 def monkey(monkey_maker: MonkeyMaker) -> Monkey:
-    return monkey_maker.create()
+    return monkey_maker.create(3)
 
 def test_monkey_maker_init(monkey_maker: MonkeyMaker):
     assert monkey_maker.items == "79, 98"
@@ -39,10 +39,10 @@ def test_monkey_maker(monkey: Monkey):
     assert monkey.false == 3
 
 def test_monkey_turn(monkey: Monkey):
-    throws = monkey.turn()
+    throws = monkey.turn(7742)
     assert throws == [
-        (3, 79),
-        (3, 98)
+        (3, 8242),
+        (3, 8362)
     ]
 
 @pytest.fixture
@@ -51,5 +51,5 @@ def monkeys_data():
         return yaml.safe_load(fhl)
 
 def test_monkeys(monkeys_data: Dict[str, Dict[str, str]]):
-    monkeys = Monkeys(makers=monkeys_data)
+    monkeys = Monkeys(makers=monkeys_data, relief=3)
     assert len(monkeys.monkeys) == 4
