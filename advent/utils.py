@@ -9,4 +9,3 @@ def iterate_over_data(path: str) -> Iterator[str]:
     with datafile.open() as fhl:
         for line in fhl.readlines():
             yield line.strip()
-

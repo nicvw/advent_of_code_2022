@@ -2,8 +2,7 @@ from textwrap import dedent
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import pytest
-from _pytest.capture import CaptureResult, CaptureFixture
+from _pytest.capture import CaptureFixture
 
 from advent.cpu import CPU, load_instructions
 

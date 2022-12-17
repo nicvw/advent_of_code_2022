@@ -1,4 +1,5 @@
 from io import StringIO
+import json
 import typer
 from rich import print
 
@@ -6,6 +7,7 @@ from advent.calories import total
 from advent.camp_cleanup import containing_pairs, overlapping_pairs
 from advent.comm_device import SignalDecoder
 from advent.cpu import CPU, load_instructions
+from advent.monkeys import Monkeys, monkey_loader
 from advent.rock_paper_scissors import rounds_from_datafile, convert_game, tally_scores
 from advent.rope import Knot, Plotter, Rope, load_rope
 from advent.rucksack import auth_stickers, reorder_rucksacks
@@ -125,3 +127,16 @@ def cpu(datafile: typer.FileText = typer.Option(default="data/cpu.txt")):
     cpu = CPU(load_instructions(datafile))
     cpu()
     print(f"Total signal: {sum(cpu.signal_strength)}")
+
+#
+# twas the eleventh day of xmas...
+#
+
+@app.command()
+def monkeys(rounds: int = typer.Argument(default=1), datafile: typer.FileText = typer.Option(default="data/monkeys.txt")):
+    data = monkey_loader(datafile.read())
+    monkeys = Monkeys(makers=data)
+    monkeys.play_rounds(rounds)
+    print(json.dumps(monkeys.scores))
+    sorted_scores = sorted(monkeys.scores.values(), reverse=True)
+    print(f"Monkey business: {sorted_scores[0] * sorted_scores[1]}")
